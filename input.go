@@ -9,38 +9,29 @@ import (
 	"unicode/utf8"
 )
 
-// Rule represents a validation rule for a field.
-// If OK is false, Message is recorded as the error reason.
-type Rule struct {
-	OK      bool   // whether the rule passed
-	Message string // message to record if the rule fails
-}
-
-// Log collects validation errors for input fields.
+// Check evaluates a field.
 //
-// Typically, Log is embedded into a struct to track
-// validation errors. After performing checks, use OK()
-// to see if all rules passed.
-type Log struct {
-	// Errors maps field names to a list of error messages.
-	Errors map[string][]string
-}
-
-// OK returns true if no errors have been recorded in Log.
-func (log *Log) OK() bool { return len(log.Errors) == 0 }
-
-// Check applies a set of rules to a field.
-// If a rule fails (OK is false), its Message is added to
-// the field's error list.
-func (log *Log) Check(field string, rules ...Rule) {
-	if log.Errors == nil {
-		log.Errors = make(map[string][]string)
+// If 'ok' is false, message is appended to errs[field].
+// If errs is nil and a message needs to be added, a new map
+// is allocated and returned.
+//
+// Check returns the updated map. It is therefore necessary
+// to store the result of Check, often in the variable
+// holding the map itself.
+//
+// Example:
+//
+//	var errors map[string][]string // nil map
+//	errors = Check(errors, "name", name != "", "name cannot be blank")
+//	errors now contains: map[string][]string{"name": {"name cannot be blank"}}
+func Check(errs map[string][]string, field string, ok bool, message string) map[string][]string {
+	if errs == nil {
+		errs = make(map[string][]string)
 	}
-	for _, rule := range rules {
-		if !rule.OK {
-			log.Errors[field] = append(log.Errors[field], rule.Message)
-		}
+	if !ok {
+		errs[field] = append(errs[field], message)
 	}
+	return errs
 }
 
 // IsMember returns true if s is found in ss.
