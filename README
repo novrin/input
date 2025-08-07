@@ -1,1 +1,17 @@
 input is a simple Go library for input validation.
+
+Ideas Explored and Rejected (EARs):
+
+* Prop	Internalize Rule fields to prevent implicit zero-value initializations
+
+	Rejected on 2025-08-06
+
+	Since the Rule type is a struct with exported fields,
+	it can unintentionally be initialized with implicit
+	zero-values. While introducing a Require function to
+	explicitly create a Rule would be an improvement, a
+	more effective solution is to eliminate all structs
+	entirely. The simplest alternative is to directly
+	parameterize the required fields into the Check 
+	function and invoke it multiple times for the same key
+	(field string) when necessary.

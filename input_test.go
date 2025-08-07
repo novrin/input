@@ -102,22 +102,16 @@ func TestIsFloat(t *testing.T) {
 	}
 }
 
-func TestLogCheckAndOK(t *testing.T) {
-	var log Log
-	log.Check("name",
-		Rule{OK: true, Message: "should not appear"},
-		Rule{OK: false, Message: "required"},
-		Rule{OK: false, Message: "too short"},
-	)
-	if log.OK() {
-		t.Error("Log should not be OK after failed checks")
-	}
-	if len(log.Errors["name"]) != 2 {
-		t.Errorf("Expected 2 errors for field 'name', got %d", len(log.Errors["name"]))
-	}
+func TestCheck(t *testing.T) {
+	var errs map[string][]string // initially nil
+	errs = Check(errs, "name", true, "should not appear")
+	errs = Check(errs, "name", false, "should appear")
+	errs = Check(errs, "name", false, "")
 
-	empty := Log{}
-	if !empty.OK() {
-		t.Error("Empty Log should be OK")
+	if len(errs) == 0 {
+		t.Error("errors should be recorded")
+	}
+	if len(errs["name"]) != 2 {
+		t.Errorf("Expected 2 errors for field 'name', got %d", len(errs["name"]))
 	}
 }
